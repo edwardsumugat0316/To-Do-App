@@ -9,7 +9,7 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <string name="action_complete">Complete</string>
+    <string name="action_complete">Complete Tasks</string>
     <string name="textview_title">Title:</string>
     <string name="tv_description">Description:</string>
     <string name="tv_status">Status</string>
@@ -22,5 +22,6 @@
     <string name="date">Date</string>
     <string name="title">Title:</string>
     <string name="description">Description:</string>
+    <string name="search">Search</string>
 
 </resources>

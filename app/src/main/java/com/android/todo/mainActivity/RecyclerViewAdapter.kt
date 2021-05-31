@@ -9,6 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Filter
+import android.widget.Filterable
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.android.todo.R
@@ -19,8 +21,9 @@ import java.nio.BufferUnderflowException
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
-class RecyclerViewAdapter (var items: List<ToDoTask>, private val context:Context, private val clickListener: ClickListener): RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>(){
+class RecyclerViewAdapter (private var items: List<ToDoTask>, private val context:Context, private val clickListener: ClickListener): RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>(){
 
     interface ClickListener {
         fun onDelete(id: Long)
@@ -82,4 +85,12 @@ class RecyclerViewAdapter (var items: List<ToDoTask>, private val context:Contex
     override fun getItemCount(): Int {
         return items.size
     }
+
+
+    fun setItems(items: List<ToDoTask>){
+        this.items = items
+        notifyDataSetChanged()
+    }
+
+
 }

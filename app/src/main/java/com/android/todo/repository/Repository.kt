@@ -1,9 +1,10 @@
 package com.android.todo.repository
 
 import com.android.todo.database.ToDoTask
+import kotlinx.coroutines.flow.Flow
 
 interface Repository {
-    suspend fun insertTask(tasks:ToDoTask )
+    suspend fun insertTask(tasks: ToDoTask)
 
     fun delete(taskNumber: Long)
 
@@ -11,11 +12,9 @@ interface Repository {
 
     suspend fun saveTask(task: List<ToDoTask>)
 
-    fun getIncompleteTasks(): List<ToDoTask>
-
     fun getTask(taskNumber: Long): ToDoTask
 
-    fun getStatus(status: Boolean): ToDoTask
+    fun getAllTasksByStatus(status: Boolean): List<ToDoTask>
 
-    fun getAllCompleteTasks(status: Boolean): List<ToDoTask>
+    fun searchTask(search: String, status: Boolean): List<ToDoTask>
 }

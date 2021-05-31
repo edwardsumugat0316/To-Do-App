@@ -2,8 +2,10 @@ package com.android.todo.mainActivity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,11 +23,12 @@ import kotlinx.coroutines.withContext
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.*
 
-class MainActivity : BaseActivity(), RecyclerViewAdapter.ClickListener {
+class MainActivity : BaseActivity(), RecyclerViewAdapter.ClickListener{
 
     private val viewModel: MainActivityViewModel by viewModel()
-
-    private var items = mutableListOf<ToDoTask>()
+    var displayList = mutableListOf<ToDoTask>()
+    private val myAdapter: RecyclerViewAdapter by lazy { RecyclerViewAdapter(displayList,this,this) }
+    private var fromOnPause = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,48 +38,46 @@ class MainActivity : BaseActivity(), RecyclerViewAdapter.ClickListener {
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
             startActivity(Intent(this, TodoActivity::class.java))
         }
+
+        setUpRecyclerView()
         setup()
+
     }
 
     override fun onResume() {
         super.onResume()
-        setup()
-    }
 
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        startActivity(Intent(this, CompleteActivity::class.java))
-        return when (item.itemId) {
-            R.id.action_complete -> true
-            else -> super.onOptionsItemSelected(item)
+        if (fromOnPause) {
+            fromOnPause = false
+            setup()
         }
+    }
+
+
+
+    override fun onPause() {
+        super.onPause()
+        fromOnPause = true
     }
 
     private fun setup() {
         viewModel.getIncompleteTask()
         viewModel.toDoTaskLiveData.observe(this) {
-            items = it.toMutableList()
-            rv_todo.adapter?.notifyDataSetChanged()
+            displayList = it.toMutableList()
+
+//            displayList = it.toMutableList()
 
             lifecycleScope.launch {
                 withContext(Dispatchers.Main) {
-                    setUpRecyclerView()
+                    myAdapter.setItems(displayList)
                 }
             }
         }
     }
 
     private fun setUpRecyclerView() {
-        val myAdapter = RecyclerViewAdapter(items, this, this)
         rv_todo.layoutManager = LinearLayoutManager(applicationContext)
-        items.removeAll { it.status }
-        rv_todo.adapter = RecyclerViewAdapter(items, this, this)
+        rv_todo.adapter = myAdapter
 
         val item = object : SwipeToDeleteCallback( this, 0, ItemTouchHelper.LEFT){
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -86,6 +87,56 @@ class MainActivity : BaseActivity(), RecyclerViewAdapter.ClickListener {
         val itemTouchHelper = ItemTouchHelper(item)
         itemTouchHelper.attachToRecyclerView(rv_todo)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+
+        val search = menu?.findItem(R.id.menu_search)
+
+        if (search != null){
+            val searchView = search.actionView as SearchView
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String): Boolean {
+                    Log.d("Query", "onQueryTextChange: $newText")
+                    viewModel.onSearch(newText)
+
+//                    if (newText!!.isNotEmpty()) {
+//                        displayList.clear()
+//
+//                        val search = newText.toLowerCase(Locale.getDefault())
+//                        items.forEach {
+//                            if (it.title.toLowerCase(Locale.getDefault()).contains(search)) {
+//                                displayList.add(it)
+//                            }
+//                        }
+//                        myAdapter.setItems(displayList)
+//                    } else {
+//                        displayList.clear()
+//                        displayList.addAll(items)
+//                        myAdapter.setItems(displayList)
+//                    }
+                    return true
+                }
+            })
+        }
+
+        return true
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        startActivity(Intent(this, CompleteActivity::class.java))
+        return when (item.itemId) {
+            R.id.action_complete -> true
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+
 
     override fun onDelete(id: Long) {
         viewModel.deleteItem(id)

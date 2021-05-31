@@ -2,10 +2,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.android.todo.mainActivity.MainActivity">
+
+    <item
+        android:id="@+id/menu_search"
+        android:icon="@drawable/ic_search_black_24dp"
+        android:orderInCategory="101"
+        android:title="@string/search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom"
+        android:iconTint="@color/white"
+        tools:targetApi="o" />
     <item
         android:id="@+id/action_complete"
         android:icon="@drawable/iconfinder_taskbar_7374"
-        android:orderInCategory="100"
+        android:orderInCategory="102"
         android:title="@string/action_complete"
-        app:showAsAction="always" />
+        app:showAsAction="collapseActionView" />
 </menu>

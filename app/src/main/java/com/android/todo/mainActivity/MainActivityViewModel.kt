@@ -1,18 +1,16 @@
 package com.android.todo.mainActivity
 
 import android.icu.text.CaseMap
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.android.todo.database.ToDoTask
 import com.android.todo.repository.Repository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivityViewModel(private val repository: Repository): ViewModel() {
     val toDoTaskLiveData: MutableLiveData<List<ToDoTask>> = MutableLiveData()
-    val updateTaskLiveData: MutableLiveData<ToDoTask> = MutableLiveData()
 
     
 
@@ -44,12 +42,23 @@ class MainActivityViewModel(private val repository: Repository): ViewModel() {
     fun getIncompleteTask(){
         viewModelScope.launch {
             withContext(Dispatchers.IO){
-                val itemList = repository.getIncompleteTasks()
+                val itemList = repository.getAllTasksByStatus(false)
                 withContext(Dispatchers.Main){
                     toDoTaskLiveData.value = itemList
                 }
             }
         }
-
     }
+
+    fun onSearch(search: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO){
+                val itemSearch = repository.searchTask(search,false)
+                withContext(Dispatchers.Main){
+                    toDoTaskLiveData.value = itemSearch
+                }
+            }
+        }
+    }
+
 }

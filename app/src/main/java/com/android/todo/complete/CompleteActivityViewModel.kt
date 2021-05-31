@@ -24,7 +24,7 @@ class CompleteActivityViewModel(private val repository: Repository): ViewModel()
     fun getCompleteTasks(){
         viewModelScope.launch {
             withContext(Dispatchers.IO){
-               val completeList =  repository.getAllCompleteTasks(true)
+               val completeList =  repository.getAllTasksByStatus(true)
                 withContext(Dispatchers.Main){
                     completeLiveData.value = completeList
                 }
